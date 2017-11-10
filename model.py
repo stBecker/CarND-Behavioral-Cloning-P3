@@ -11,7 +11,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
 
-root_folder = "c:"
+# root_folder = "c:"
+root_folder = "/home/sb"
 correction = 0.1  # this is a parameter to tune
 
 batch_size = 32
@@ -24,6 +25,7 @@ with open(root_folder + '/dl_data/driving_log.csv') as csvfile:
     for line in reader:
         samples.append(line)
 
+samples = samples[:100]
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 
 
@@ -34,9 +36,9 @@ def read_images(images, angles, batch_sample):
     steering_right = center_angle - correction
 
     base_path = root_folder + '/dl_data/IMG/'
-    cname = base_path + os.path.split(batch_sample[0])[-1]
-    lname = base_path + os.path.split(batch_sample[1])[-1]
-    rname = base_path + os.path.split(batch_sample[2])[-1]
+    cname = base_path + os.path.split(batch_sample[0].replace("\\", "/"))[-1]
+    lname = base_path + os.path.split(batch_sample[1].replace("\\", "/"))[-1]
+    rname = base_path + os.path.split(batch_sample[2].replace("\\", "/"))[-1]
     center_image = cv2.imread(cname)
     l_image = cv2.imread(lname)
     r_image = cv2.imread(rname)
@@ -72,7 +74,7 @@ def generator(samples, batch_size=32):
 print("Reading images")
 images = []
 angles = []
-for batch_sample in train_samples[:95]:
+for batch_sample in train_samples:
     read_images(images, angles, batch_sample)
 
 X_train = np.array(images)
@@ -80,7 +82,7 @@ y_train = np.array(angles)
 
 images = []
 angles = []
-for batch_sample in validation_samples[:93]:
+for batch_sample in validation_samples:
     read_images(images, angles, batch_sample)
 
 X_val = np.array(images)
