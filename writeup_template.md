@@ -87,11 +87,15 @@ was very similar to the project goal: predicting steering angles from camera ima
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set.
 I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting.
 
-To combat the overfitting, I used training data from both track 1 and 2 driven in forward and reverse directions.
+To combat the overfitting, I used training data from both track 1 and 2 driven in forward and reverse directions. I also
+added an early stopping callback to keras, which terminates training as soon as the validation loss does not decrease for two
+consecutive epochs. Adding a dropout layer to the model architecture after the first 3 convolutional layers produced worse
+results, so this idea was discarded.
 
 The final step was to run the simulator to see how well the car was driving around track one. 
-The vehicle made it all around track 1 without problems; on track 2 the vehicle made it about 3/4 around the track until
-it got stuck in a sharp curve.
+In my first attempt the vehicle made it all around track 1 until the last sharp right curve where it briefly crossed the
+left lane line; to fix this I collected a few more training images for this curve,  focusing on keeping more to the right.
+After retraining the model the vehicle finally made it all the way around the track.
 
 ####2. Final Model Architecture
 
