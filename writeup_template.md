@@ -18,13 +18,13 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[model_viz]: ./examples/model_viz.PNG "Model Visualization"
+[center]: ./examples/center.jpg "Center driving"
+[recovery1]: ./examples/recovery1.jpg "Recovery Image"
+[recovery2]: ./examples/recovery2.jpg "Recovery Image"
+[recovery3]: ./examples/recovery3.jpg "Recovery Image"
+[left_cam]: ./examples/left_cam.jpg "Left cam"
+[track2]: ./examples/track2.jpg "Track2 Image"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -54,23 +54,25 @@ The model.py file contains the code for training and saving the convolution neur
 
 ####1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
-
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+I decided to use the model architecture by nVidia described in http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf
+Additionally I added a cropping layer right before the normalization layer, otherwise the CNN remains unchanged.
+The CNN consists of five convolutional layers with RELU activations followed by three fully connected layers without activations.
+The first three convolutional layers use 5x5 kernels with stride 2 and dephts 24, 36 and 48 respectivly;
+the 4th and 5th convolutional layers use 3x3 kernels with stride 1 and depths 64 and 64.
 
 ####2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
-
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was trained and validated on different data sets to ensure that the model was not overfitting: the data sets include images from both track 1 and 2, driven in forward and reverse directions.
+The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 ####3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, so the learning rate was not tuned manually. As a loss function I used the mean squared error (MSE).
+The batch size was chosen as the maximum which could comfortably fit into memory on the training machine, 32 samples in this case.
 
 ####4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road, driving in reverse direction and data from both track 1 and 2.
 
 For details about how I created the training data, see the next section. 
 
@@ -78,52 +80,65 @@ For details about how I created the training data, see the next section.
 
 ####1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+The overall strategy for deriving a model architecture was to use a proven architecture as a basis and then fine tune it to match the specific use case.
+I thought this model might be appropriate because the described use case in the paper (http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf)
+was very similar to the project goal: predicting steering angles from camera images.
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set.
+I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting.
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+To combat the overfitting, I used training data from both track 1 and 2 driven in forward and reverse directions.
 
-To combat the overfitting, I modified the model so that ...
-
-Then I ... 
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
-
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+The final step was to run the simulator to see how well the car was driving around track one. 
+The vehicle made it all around track 1 without problems; on track 2 the vehicle made it about 3/4 around the track until
+it got stuck in a sharp curve.
 
 ####2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+For the  final model architecture I decided to use the model architecture by nVidia
+described in http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf
+Additionally I added a cropping layer right before the normalization layer, otherwise the CNN remains unchanged.
+The CNN consists of five convolutional layers with RELU activations followed by three fully connected layers without activations.
+The first three convolutional layers use 5x5 kernels with stride 2 and dephts 24, 36 and 48 respectivly;
+the 4th and 5th convolutional layers use 3x3 kernels with stride 1 and depths 64 and 64.
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
 
-![alt text][image1]
+![alt text][model_viz]
 
 ####3. Creation of the Training Set & Training Process
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
-![alt text][image2]
+![alt text][center]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to recover from a bad position.
+These images show what a recovery looks like starting from the right side of the road :
 
-![alt text][image3]
-![alt text][image4]
-![alt text][image5]
+![alt text][recovery1]
+![alt text][recovery2]
+![alt text][recovery3]
+
+To help the model to generalize more and prevent a left turning bias, I recorder two more laps driving in the opposite direction.
 
 Then I repeated this process on track two in order to get more data points.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+![alt text][track2]
 
-![alt text][image6]
-![alt text][image7]
+To augment the data sat, I also flipped images and angles thinking that this would help to generalize more For example, here is an image that has then been flipped:
 
-Etc ....
+Additionally to the center images I also used the left and right camera images, combined with a 0.1 steering angle offset compared to the center image.
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+![alt text][left_cam]
 
+For the final model I used only the unaltered center images.
+After the collection process, I had 26984 data points. During training the images where cropped about in the middle to only contain relevant information; specifically the image of the hood at the bottom
+of the center image and the background in the upper half of the image were cropped out.
+Furthermore the images were normalized to lie between -1 and 1 with mean 0.
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
+I finally randomly shuffled the data set and put 20% of the data into a validation set.
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting.
+From the training log we can see that the validation loss reached a low level at around epoch 20 and then didn't change
+much from there on; the lowest overall validation loss however was recorded in epoch 98. The model was trained for 100 epochs.
+I used an adam optimizer so that manually training the learning rate wasn't necessary.
